@@ -6,7 +6,7 @@ He is currently a Fellow at No.2 High School of East China Normal University.
 
 #### Contact
 
-Email: matthew1115[at]outlook.com
+Email: matthew1115@outlook.com
 
 #### Research Interests
 Computer Science, Deep Learning, Artificial Intelligence.
