@@ -11,7 +11,7 @@
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
 :root {
-  --bs-blue: #2937f0;
+  --bs-blue: #c00000;
   --bs-indigo: #6610f2;
   --bs-purple: #9f1ae2;
   --bs-pink: #d63384;
@@ -10885,10 +10885,10 @@ section {
 }
 #mainNav .navbar-nav .nav-item .nav-link:hover {
 
-   color: var(--bs-blue)
+  color: #c00000
 }
 #mainNav .navbar-nav .nav-item .nav-link.active {
-  color: #2937f0;
+  color: #c00000;
 }
 
 

@@ -2,11 +2,11 @@
 
 
 :root{
-    --h-title-color:#3948d2;
+    --h-title-color:#c00000;
 }
 
 .header {
-    border-bottom: solid 2px var(--bs-blue);
+    border-bottom: solid 2px #c00000;
     z-index: 10000;
 }
 
