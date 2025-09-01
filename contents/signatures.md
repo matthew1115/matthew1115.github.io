@@ -1,12 +1,12 @@
 #### ED-25519 SSH public key
-```
+
 ssh-ed25519 
 AAAAC3NzaC1lZDI1NTE5AAAAIB62rbZfZGxwSNgvbtEN74Z4f1thr/jLhjsYmPsTkIXI 
 matthew_1115@outlook.com
-```
+
 
 #### PGP public key
-```
+
 -----BEGIN PGP PUBLIC KEY BLOCK-----
 
 mDMEaGtkfRYJKwYBBAHaRw8BAQdAm/YZDRjzqilZ0Tx1Gm7lQe01XEYypf0yB2XG
@@ -21,4 +21,3 @@ rMEpqj23Xm/md0iCgMDmAP9rV0orOwIVU3T9BJZ5dxudBqylNXWFpAnV9BdPZ5kk
 Aw==
 =sOC2
 -----END PGP PUBLIC KEY BLOCK-----
-```
