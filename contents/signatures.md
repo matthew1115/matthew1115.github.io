@@ -6,14 +6,13 @@ AAAAC3NzaC1lZDI1NTE5AAAAIB62rbZfZGxwSNgvbtEN74Z4f1thr/jLhjsYmPsTkIXI
 matthew_1115@outlook.com
 ```
 
-#### PGP public key
-
 &nbsp;
+
+#### PGP public key
 
 ```
 -----BEGIN PGP PUBLIC KEY BLOCK-----
-```
-```
+
 mDMEaGtkfRYJKwYBBAHaRw8BAQdAm/YZDRjzqilZ0Tx1Gm7lQe01XEYypf0yB2XG
 C2WCPj60JU1hdHRoZXcgSGUgPG1hdHRoZXdfMTExNUBvdXRsb29rLmNvbT6ImQQT
 FgoAQRYhBDM3XJY+UrFJNQwWBj0GJEgquoo+BQJoa2R9AhsDBQkTuTLDBQsJCAcC
@@ -24,8 +23,8 @@ Ub6ftEkUo3P8n4MjHwMBCAeIfgQYFgoAJhYhBDM3XJY+UrFJNQwWBj0GJEgquoo+
 BQJoa2R9AhsMBQkTuTLDAAoJED0GJEgquoo+SugBALuFgZ4dGwxGxanPNpOKrEvW
 rMEpqj23Xm/md0iCgMDmAP9rV0orOwIVU3T9BJZ5dxudBqylNXWFpAnV9BdPZ5kk
 Aw==
+
 =sOC2
-```
-```
+
 -----END PGP PUBLIC KEY BLOCK-----
 ```
