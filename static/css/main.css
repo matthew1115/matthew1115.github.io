@@ -99,7 +99,10 @@ section .main-body{
 }
 
 #avatar img {
-    height: max(130px,min(200px,calc(100vw/6)));
+    height: 16.6vw;
+    min-height: 130px;
+    max-height: 200px;
+    width: auto;
     box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.2);
 }
 
@@ -108,5 +111,3 @@ section .main-body{
         margin: 0;
     }
 }
-
-
