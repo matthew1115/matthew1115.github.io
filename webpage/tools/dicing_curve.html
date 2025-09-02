@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dice Distribution Visualizer</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #1a252f;
+            text-align: center;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        input[type="number"] {
+            width: 70px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #c00000;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #a00000;
+        }
+
+        #stats {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.1em;
+            color: #444;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 40vh;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Dice Distribution Visualizer</h1>
+        <div class="controls">
+            <div class="input-group">
+                <input type="number" id="numDice" value="5" min="1">
+                <span>d</span>
+                <input type="number" id="numFaces" value="6" min="2">
+                <span>+</span>
+                <input type="number" id="diceAdd" value="0" step="1">
+            </div>
+            <button id="drawButton">Generate Distribution</button>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="diceChart"></canvas>
+        </div>
+
+        <div id="stats"></div>
+    </div>
+
+    <script>
+        // A global variable to hold our chart instance so we can destroy it before creating a new one.
+        let chartInstance = null;
+        const drawButton = document.getElementById('drawButton');
+        const numDiceInput = document.getElementById('numDice');
+        const numFacesInput = document.getElementById('numFaces');
+        const diceAddition = document.getElementById('diceAdd')
+        const statsDiv = document.getElementById('stats');
+
+        /**
+         * Calculates the Probability Density Function (PDF) for a normal distribution.
+         * This approximates the discrete dice roll distribution, which works very well for a large number of dice.
+         * The formula is: PDF(x) = (1 / (σ * √(2π))) * e^(-(x - μ)² / (2σ²))
+         * @param {number} x The value to evaluate.
+         * @param {number} mean The mean (μ) of the distribution.
+         * @param {number} stdDev The standard deviation (σ) of the distribution.
+         * @returns {number} The probability density at x.
+         */
+        function normalPDF(x, mean, stdDev) {
+            const variance = stdDev ** 2;
+            const coefficient = 1 / (stdDev * Math.sqrt(2 * Math.PI));
+            const exponent = -((x - mean) ** 2) / (2 * variance);
+            return coefficient * Math.exp(exponent);
+        }
+
+        function drawDistribution() {
+            // 1. Get user input
+            const numDice = parseInt(numDiceInput.value);
+            const numFaces = parseInt(numFacesInput.value);
+
+            if (isNaN(numDice) || isNaN(numFaces) || numDice < 1 || numFaces < 2) {
+                statsDiv.textContent = 'Please enter valid numbers (Dice ≥ 1, Faces ≥ 2).';
+                return;
+            }
+
+            // 2. Calculate statistics based on the Central Limit Theorem
+            // Mean of a single die: μ_single = (s + 1) / 2
+            const singleDieMean = (numFaces + 1) / 2;
+            // Variance of a single die: σ²_single = (s² - 1) / 12
+            const singleDieVariance = (numFaces ** 2 - 1) / 12;
+
+            const totalMean = numDice * singleDieMean;
+            const totalVariance = numDice * singleDieVariance;
+            const totalStdDev = Math.sqrt(totalVariance);
+
+            // 3. Generate data for the chart
+            const minSum = numDice;
+            const maxSum = numDice * numFaces;
+
+            const labels = [];
+            const data = [];
+
+            for (let i = minSum; i <= maxSum; i++) {
+                labels.push(i);
+                data.push(normalPDF(i, totalMean, totalStdDev) + diceAddition);
+            }
+
+            // 4. Display statistics
+            statsDiv.innerHTML = `
+                <b>Mean (Average Sum):</b> ${totalMean.toFixed(2)} <br>
+                <b>Standard Deviation:</b> ${totalStdDev.toFixed(2)} <br>
+                <b>Range of Sums:</b> ${minSum} to ${maxSum}
+            `;
+
+            // 5. Draw the chart using Chart.js
+            const ctx = document.getElementById('diceChart').getContext('2d');
+
+            // If a chart already exists, destroy it to prevent conflicts
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `Distribution for ${numDice}d${numFaces}`,
+                        data: data,
+                        backgroundColor: 'rgba(192, 0, 0, 0.2)',
+                        borderColor: 'rgba(192, 0, 0, 1)',
+                        borderWidth: 2,
+                        pointRadius: 0, // Hide points for a smooth curve
+                        fill: true,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Probability Density'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Sum of Dice'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // Add event listener to the button
+        drawButton.addEventListener('click', drawDistribution);
+
+        // Draw the default distribution when the page loads
+        window.onload = drawDistribution;
+    </script>
+
+</body>
+
+</html>
