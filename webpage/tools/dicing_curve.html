@@ -113,7 +113,7 @@
         const drawButton = document.getElementById('drawButton');
         const numDiceInput = document.getElementById('numDice');
         const numFacesInput = document.getElementById('numFaces');
-        const diceAddition = document.getElementById('diceAdd')
+        const diceAdditionInput = document.getElementById('diceAdd')
         const statsDiv = document.getElementById('stats');
 
         /**
@@ -133,18 +133,19 @@
         }
 
         function drawDistribution() {
-            // 1. Get user input
             const numDice = parseInt(numDiceInput.value);
             const numFaces = parseInt(numFacesInput.value);
+            const diceAddition = parseInt(diceAdditionInput.value);
 
             if (isNaN(numDice) || isNaN(numFaces) || numDice < 1 || numFaces < 2) {
                 statsDiv.textContent = 'Please enter valid numbers (Dice ≥ 1, Faces ≥ 2).';
                 return;
             }
 
-            // 2. Calculate statistics based on the Central Limit Theorem
+            // Calculate statistics based on the Central Limit Theorem
             // Mean of a single die: μ_single = (s + 1) / 2
             const singleDieMean = (numFaces + 1) / 2;
+            // use Var[x]=E[x²]−(E[x])²
             // Variance of a single die: σ²_single = (s² - 1) / 12
             const singleDieVariance = (numFaces ** 2 - 1) / 12;
 
@@ -152,7 +153,7 @@
             const totalVariance = numDice * singleDieVariance;
             const totalStdDev = Math.sqrt(totalVariance);
 
-            // 3. Generate data for the chart
+            // Generate data for the chart
             const minSum = numDice;
             const maxSum = numDice * numFaces;
 
@@ -160,18 +161,18 @@
             const data = [];
 
             for (let i = minSum; i <= maxSum; i++) {
-                labels.push(i);
-                data.push(normalPDF(i, totalMean, totalStdDev) + diceAddition);
+                labels.push(i + diceAddition);
+                data.push(normalPDF(i, totalMean, totalStdDev));
             }
 
-            // 4. Display statistics
+            // Display stats above chart
             statsDiv.innerHTML = `
                 <b>Mean (Average Sum):</b> ${totalMean.toFixed(2)} <br>
                 <b>Standard Deviation:</b> ${totalStdDev.toFixed(2)} <br>
                 <b>Range of Sums:</b> ${minSum} to ${maxSum}
             `;
 
-            // 5. Draw the chart using Chart.js
+            // Draw the chart with Chart.js
             const ctx = document.getElementById('diceChart').getContext('2d');
 
             // If a chart already exists, destroy it to prevent conflicts
@@ -184,7 +185,7 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: `Distribution for ${numDice}d${numFaces}`,
+                        label: `Distribution for ${numDice}d${numFaces}+${diceAddition}`,
                         data: data,
                         backgroundColor: 'rgba(192, 0, 0, 0.2)',
                         borderColor: 'rgba(192, 0, 0, 1)',
