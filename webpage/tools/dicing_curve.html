@@ -133,6 +133,7 @@
         }
 
         function drawDistribution() {
+            // Get input
             const numDice = parseInt(numDiceInput.value);
             const numFaces = parseInt(numFacesInput.value);
             const diceAddition = parseInt(diceAdditionInput.value);
@@ -142,35 +143,36 @@
                 return;
             }
 
-            // Calculate statistics based on the Central Limit Theorem
-            // Mean of a single die: μ_single = (s + 1) / 2
-            const singleDieMean = (numFaces + 1) / 2;
-            // use Var[x]=E[x²]−(E[x])²
-            // Variance of a single die: σ²_single = (s² - 1) / 12
-            const singleDieVariance = (numFaces ** 2 - 1) / 12;
+            // Bad Idea to use the CLT, unlike in stats, most use cases cause great errors with the curve.
+            // // Calculate statistics based on the Central Limit Theorem
+            // // Mean of a single die: μ_single = (s + 1) / 2
+            // const singleDieMean = (numFaces + 1) / 2;
+            // // use Var[x]=E[x²]−(E[x])²
+            // // Variance of a single die: σ²_single = (s² - 1) / 12
+            // const singleDieVariance = (numFaces ** 2 - 1) / 12;
 
-            const totalMean = numDice * singleDieMean;
-            const totalVariance = numDice * singleDieVariance;
-            const totalStdDev = Math.sqrt(totalVariance);
+            // const totalMean = numDice * singleDieMean;
+            // const totalVariance = numDice * singleDieVariance;
+            // const totalStdDev = Math.sqrt(totalVariance);
 
-            // Generate data for the chart
-            const minSum = numDice;
-            const maxSum = numDice * numFaces;
+            // // Generate data for the chart
+            // const minSum = numDice;
+            // const maxSum = numDice * numFaces;
 
-            const labels = [];
-            const data = [];
+            // const labels = [];
+            // const data = [];
 
-            for (let i = minSum; i <= maxSum; i++) {
-                labels.push(i + diceAddition);
-                data.push(normalPDF(i, totalMean, totalStdDev));
-            }
+            // for (let i = minSum; i <= maxSum; i++) {
+            //     labels.push(i + diceAddition);
+            //     data.push(normalPDF(i, totalMean, totalStdDev));
+            // }
 
-            // Display stats above chart
-            statsDiv.innerHTML = `
-                <b>Mean (Average Sum):</b> ${totalMean.toFixed(2)} <br>
-                <b>Standard Deviation:</b> ${totalStdDev.toFixed(2)} <br>
-                <b>Range of Sums:</b> ${minSum} to ${maxSum}
-            `;
+            // // Display stats above chart
+            // statsDiv.innerHTML = `
+            //     <b>Mean (Average Sum):</b> ${totalMean.toFixed(2)} <br>
+            //     <b>Standard Deviation:</b> ${totalStdDev.toFixed(2)} <br>
+            //     <b>Range of Sums:</b> ${minSum} to ${maxSum}
+            // `;
 
             // Draw the chart with Chart.js
             const ctx = document.getElementById('diceChart').getContext('2d');

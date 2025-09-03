@@ -1,0 +1,17 @@
+<!-- marked -->
+<script src="../../static//js/marked.min.js"></script>
+<!-- Mathematics -->
+<script src="../../static/js/tex-mml-chtml.js"></script>
+<script src="../../static/js/mathjax_sniffer.js"></script>
+
+<script>
+    fetch('../../contents/blogs/from_dice_to_multinominal.md')
+        .then(response => response.text())
+        .then(markdown => {
+            const html = marked.parse(markdown);
+            document.body.innerHTML = html;
+        }).then(() => {
+            MathJax.typeset();
+        })
+        .catch(error => console.log(error));
+</script>
