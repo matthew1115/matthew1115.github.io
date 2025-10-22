@@ -4,12 +4,37 @@
 <script src="../../static/js/tex-mml-chtml.js"></script>
 <script src="../../static/js/mathjax_sniffer.js"></script>
 
+<!-- Centered content container -->
+<style>
+    .markdown-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 1rem;
+    }
+
+    .markdown-container img,
+    .markdown-container video,
+    .markdown-container canvas,
+    .markdown-container svg {
+        max-width: 100%;
+        height: auto;
+    }
+</style>
+
+<div id="content" class="markdown-container"></div>
+
 <script>
     fetch('../../contents/blogs/from_dice_to_multinominal.md')
         .then(response => response.text())
         .then(markdown => {
             const html = marked.parse(markdown);
-            document.body.innerHTML = html;
+            const container = document.getElementById('content');
+            if (container) {
+                container.innerHTML = html;
+            } else {
+                // Fallback: ensure content is wrapped in a centered container
+                document.body.innerHTML = '<div id="content" class="markdown-container">' + html + '</div>';
+            }
         }).then(() => {
             MathJax.typeset();
         })

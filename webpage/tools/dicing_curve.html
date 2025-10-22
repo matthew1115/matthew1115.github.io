@@ -1,236 +1,276 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dice Distribution Visualizer</title>
+    <title>Dice Roll Distribution Plotter</title>
+    <!-- Chart.js for plotting -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #f4f7f6;
-            color: #333;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            width: 90%;
-            max-width: 800px;
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            color: #1a252f;
-            text-align: center;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .input-group {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        input[type="number"] {
-            width: 70px;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #c00000;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        button:hover {
-            background-color: #a00000;
-        }
-
-        #stats {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 1.1em;
-            color: #444;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 40vh;
-            width: 100%;
-        }
-    </style>
+    <!-- Site CSS -->
+    <link rel="stylesheet" href="../../static/css/main.css">
 </head>
+<body class="bg-light">
 
-<body>
+    <div class="container my-4">
+        <!-- Header -->
+        <header class="text-center mb-3">
+            <h1 class="h2">Dice Roll Distribution</h1>
+            <p class="text-muted">Visualize the probability distribution of dice rolls using exact calculations or the Central Limit Theorem.</p>
+        </header>
 
-    <div class="container">
-        <h1>Dice Distribution Visualizer</h1>
-        <div class="controls">
-            <div class="input-group">
-                <input type="number" id="numDice" value="5" min="1">
-                <span>d</span>
-                <input type="number" id="numFaces" value="6" min="2">
-                <span>+</span>
-                <input type="number" id="diceAdd" value="0" step="1">
+        <!-- Input Form -->
+        <form id="diceForm" class="row g-3 card p-3">
+            <!-- Number of Dice -->
+            <div class="col-md-3">
+                <label for="diceCount" class="form-label">Number of Dice (m)</label>
+                <input type="number" id="diceCount" value="3" min="1" max="200" class="form-control">
             </div>
-            <button id="drawButton">Generate Distribution</button>
-        </div>
+            <!-- Number of Faces -->
+            <div class="col-md-3">
+                <label for="faceCount" class="form-label">Faces per Die (n)</label>
+                <input type="number" id="faceCount" value="6" min="2" max="200" class="form-control">
+            </div>
+            <!-- Calculation Method -->
+            <div class="col-md-3">
+                 <label for="method" class="form-label">Method</label>
+                <select id="method" class="form-select">
+                    <option value="exact" selected>Exact</option>
+                    <option value="clt">CLT Approximation</option>
+                    <option value="both">Compare Both</option>
+                </select>
+            </div>
+            <!-- Submit Button -->
+            <div class="col-md-3 d-grid align-self-end">
+                <button type="submit" class="btn btn-danger">Plot Distribution</button>
+            </div>
+        </form>
+        
+        <!-- Warning Message Area -->
+        <div id="warning" class="alert alert-warning text-center d-none mt-2"></div>
 
-        <div class="chart-container">
-            <canvas id="diceChart"></canvas>
+        <!-- Chart and Stats -->
+        <div class="row g-3 mt-2">
+            <!-- Chart Container -->
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-body" style="height: 24rem;">
+                        <canvas id="diceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- Stats Display -->
+            <div class="col-lg-4">
+                <div id="stats" class="card h-100">
+                    <div class="card-body">
+                        <h2 class="h5 text-center mb-3">Statistics</h2>
+                        <div class="d-flex justify-content-between align-items-center mb-2"><span>Mean (μ):</span> <span id="mean" class="badge text-bg-light">--</span></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2"><span>Variance (σ²):</span> <span id="variance" class="badge text-bg-light">--</span></div>
+                        <div class="d-flex justify-content-between align-items-center"><span>Std. Dev. (σ):</span> <span id="stdDev" class="badge text-bg-light">--</span></div>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div id="stats"></div>
     </div>
 
     <script>
-        // A global variable to hold our chart instance so we can destroy it before creating a new one.
-        let chartInstance = null;
-        const drawButton = document.getElementById('drawButton');
-        const numDiceInput = document.getElementById('numDice');
-        const numFacesInput = document.getElementById('numFaces');
-        const diceAdditionInput = document.getElementById('diceAdd')
-        const statsDiv = document.getElementById('stats');
+        const form = document.getElementById('diceForm');
+        const warningDiv = document.getElementById('warning');
+        let myChart = null;
 
         /**
-         * Calculates the Probability Density Function (PDF) for a normal distribution.
-         * This approximates the discrete dice roll distribution, which works very well for a large number of dice.
-         * The formula is: PDF(x) = (1 / (σ * √(2π))) * e^(-(x - μ)² / (2σ²))
-         * @param {number} x The value to evaluate.
-         * @param {number} mean The mean (μ) of the distribution.
-         * @param {number} stdDev The standard deviation (σ) of the distribution.
-         * @returns {number} The probability density at x.
+         * Calculates the exact probability distribution for m dice with n faces.
+         * Uses an optimized dynamic programming approach.
+         * @param {number} m - Number of dice.
+         * @param {number} n - Number of faces per die.
+         * @returns {number[]} An array of probabilities for each sum.
          */
-        function normalPDF(x, mean, stdDev) {
-            const variance = stdDev ** 2;
-            const coefficient = 1 / (stdDev * Math.sqrt(2 * Math.PI));
-            const exponent = -((x - mean) ** 2) / (2 * variance);
-            return coefficient * Math.exp(exponent);
+        function calculateExactDistribution(m, n) {
+            const maxSum = m * n;
+            let prevDp = new Array(maxSum + 1).fill(0n);
+            prevDp[0] = 1n; // Base case: 1 way to get sum 0 with 0 dice.
+
+            for (let i = 1; i <= m; i++) { // For each die
+                const currentDp = new Array(maxSum + 1).fill(0n);
+                // Optimized recurrence: dp[i][s] = dp[i][s-1] + dp[i-1][s-1] - dp[i-1][s-n-1]
+                for (let s = 1; s <= maxSum; s++) {
+                    const term1 = currentDp[s - 1] || 0n;
+                    const term2 = prevDp[s - 1] || 0n;
+                    const term3 = prevDp[s - n - 1] || 0n;
+                    currentDp[s] = term1 + term2 - term3;
+                }
+                prevDp = currentDp;
+            }
+
+            const finalCounts = prevDp.slice(m); // Possible sums start from m
+            const totalOutcomes = BigInt(n) ** BigInt(m);
+            
+            // Convert BigInt counts to float probabilities, handling potential precision loss
+            const probabilities = finalCounts.map(count => {
+                if (totalOutcomes === 0n) return 0;
+                // Use a large multiplier to maintain precision during conversion
+                return Number(count * 1_000_000_000_000n / totalOutcomes) / 1_000_000_000_000;
+            });
+
+            return probabilities;
         }
 
-        function drawDistribution() {
-            // Get input
-            const numDice = parseInt(numDiceInput.value);
-            const numFaces = parseInt(numFacesInput.value);
-            const diceAddition = parseInt(diceAdditionInput.value);
-
-            if (isNaN(numDice) || isNaN(numFaces) || numDice < 1 || numFaces < 2) {
-                statsDiv.textContent = 'Please enter valid numbers (Dice ≥ 1, Faces ≥ 2).';
-                return;
+        /**
+         * Calculates the probability distribution using the Central Limit Theorem.
+         * @param {number} m - Number of dice.
+         * @param {number} n - Number of faces per die.
+         * @returns {number[]} An array of probability densities for each sum.
+         */
+        function calculateCLTDistribution(m, n) {
+            const mean = m * (n + 1) / 2;
+            const variance = m * (n * n - 1) / 12;
+            if (variance === 0) return new Array(m * n - m + 1).fill(0);
+            
+            const stdDev = Math.sqrt(variance);
+            const probabilities = [];
+            
+            for (let s = m; s <= m * n; s++) {
+                // PDF of the Normal distribution
+                const exponent = -((s - mean) ** 2) / (2 * variance);
+                const pdf = (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(exponent);
+                probabilities.push(pdf);
             }
+            return probabilities;
+        }
 
-            // Bad Idea to use the CLT, unlike in stats, most use cases cause great errors with the curve.
-            // // Calculate statistics based on the Central Limit Theorem
-            // // Mean of a single die: μ_single = (s + 1) / 2
-            // const singleDieMean = (numFaces + 1) / 2;
-            // // use Var[x]=E[x²]−(E[x])²
-            // // Variance of a single die: σ²_single = (s² - 1) / 12
-            // const singleDieVariance = (numFaces ** 2 - 1) / 12;
+        /**
+         * Updates the statistics display on the page.
+         * @param {number} m - Number of dice.
+         * @param {number} n - Number of faces per die.
+         */
+        function updateStats(m, n) {
+            const mean = m * (n + 1) / 2;
+            const variance = m * (n * n - 1) / 12;
+            const stdDev = Math.sqrt(variance);
+            document.getElementById('mean').textContent = mean.toFixed(3);
+            document.getElementById('variance').textContent = variance.toFixed(3);
+            document.getElementById('stdDev').textContent = stdDev.toFixed(3);
+        }
 
-            // const totalMean = numDice * singleDieMean;
-            // const totalVariance = numDice * singleDieVariance;
-            // const totalStdDev = Math.sqrt(totalVariance);
-
-            // // Generate data for the chart
-            // const minSum = numDice;
-            // const maxSum = numDice * numFaces;
-
-            // const labels = [];
-            // const data = [];
-
-            // for (let i = minSum; i <= maxSum; i++) {
-            //     labels.push(i + diceAddition);
-            //     data.push(normalPDF(i, totalMean, totalStdDev));
-            // }
-
-            // // Display stats above chart
-            // statsDiv.innerHTML = `
-            //     <b>Mean (Average Sum):</b> ${totalMean.toFixed(2)} <br>
-            //     <b>Standard Deviation:</b> ${totalStdDev.toFixed(2)} <br>
-            //     <b>Range of Sums:</b> ${minSum} to ${maxSum}
-            // `;
-
-            // Draw the chart with Chart.js
+        /**
+         * Plots the distribution(s) on the canvas.
+         * @param {number[]} labels - The x-axis labels (sums).
+         * @param {number[]|null} exactData - The exact probability data.
+         * @param {number[]|null} cltData - The CLT approximation data.
+         * @param {string} title - The chart title.
+         */
+        function plotDistribution(labels, exactData, cltData, title) {
             const ctx = document.getElementById('diceChart').getContext('2d');
-
-            // If a chart already exists, destroy it to prevent conflicts
-            if (chartInstance) {
-                chartInstance.destroy();
+            if (myChart) {
+                myChart.destroy();
             }
 
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: `Distribution for ${numDice}d${numFaces}+${diceAddition}`,
-                        data: data,
-                        backgroundColor: 'rgba(192, 0, 0, 0.2)',
-                        borderColor: 'rgba(192, 0, 0, 1)',
-                        borderWidth: 2,
-                        pointRadius: 0, // Hide points for a smooth curve
-                        fill: true,
-                    }]
-                },
+            const datasets = [];
+            if (exactData) {
+                datasets.push({
+                    label: 'Exact Distribution',
+                    data: exactData,
+                    backgroundColor: 'rgba(220, 53, 69, 0.6)',
+                    borderColor: 'rgba(220, 53, 69, 1)',
+                    borderWidth: 1,
+                    type: 'bar',
+                    barPercentage: 1.0,
+                    categoryPercentage: 1.0,
+                });
+            }
+            if (cltData) {
+                datasets.push({
+                    label: 'CLT Approximation',
+                    data: cltData,
+                    borderColor: 'rgba(13, 110, 253, 0.9)',
+                    borderWidth: 3,
+                    type: 'line',
+                    fill: false,
+                    pointRadius: 0,
+                    tension: 0.1,
+                    borderDash: [6, 4]
+                });
+            }
+
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: labels, datasets: datasets },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Probability Density'
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Sum of Dice'
+                    plugins: {
+                        title: { display: true, text: title, font: { size: 18 } },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toPrecision(4)}`
                             }
                         }
                     },
-                    plugins: {
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Probability' }
+                        },
+                        x: {
+                            title: { display: true, text: 'Sum of Rolls' },
+                            ticks: {
+                                maxTicksLimit: 25, // Prevents axis from getting too cluttered
+                                autoSkip: true,
+                            }
                         }
                     }
                 }
             });
+            // Optional: fade-in animation removed to rely on site CSS only
+        }
+        
+        /**
+         * Main function to handle form submission and orchestrate calculations and plotting.
+         */
+        function handlePlot() {
+            const m = parseInt(document.getElementById('diceCount').value) || 0;
+            const n = parseInt(document.getElementById('faceCount').value) || 0;
+            const method = document.getElementById('method').value;
+
+            warningDiv.classList.add('d-none');
+            warningDiv.textContent = '';
+
+            if (m <= 0 || n < 2) {
+                warningDiv.textContent = 'Please enter a valid number of dice (>= 1) and faces (>= 2).';
+                warningDiv.classList.remove('d-none');
+                return;
+            }
+
+            const computationSize = m * n;
+            if ((method === 'exact' || method === 'both') && computationSize > 10000) {
+                 warningDiv.textContent = `Warning: Exact calculation for ${m}d${n} may be slow.`;
+                 warningDiv.classList.remove('d-none');
+            }
+
+            const minSum = m;
+            const maxSum = m * n;
+            const labels = Array.from({ length: maxSum - minSum + 1 }, (_, i) => minSum + i);
+
+            let exactProbs = null;
+            if (method === 'exact' || method === 'both') {
+                exactProbs = calculateExactDistribution(m, n);
+            }
+
+            let cltProbs = null;
+            if (method === 'clt' || method === 'both') {
+                cltProbs = calculateCLTDistribution(m, n);
+            }
+            
+            updateStats(m, n);
+            plotDistribution(labels, exactProbs, cltProbs, `Distribution for ${m}d${n}`);
         }
 
-        // Add event listener to the button
-        drawButton.addEventListener('click', drawDistribution);
-
-        // Draw the default distribution when the page loads
-        window.onload = drawDistribution;
+        // Add event listener and trigger initial plot on load
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            handlePlot();
+        });
+        
+        window.addEventListener('load', handlePlot);
     </script>
-
 </body>
-
 </html>
