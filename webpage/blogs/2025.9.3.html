@@ -1,8 +1,8 @@
 <!-- marked -->
 <script src="../../static//js/marked.min.js"></script>
-<!-- Mathematics -->
+<!-- Mathematics - Configuration must load BEFORE MathJax -->
+<script src="../../static/js/mathjax_config.js"></script>
 <script src="../../static/js/tex-mml-chtml.js"></script>
-<script src="../../static/js/mathjax_sniffer.js"></script>
 
 <!-- Centered content container -->
 <style>
@@ -36,7 +36,10 @@
                 document.body.innerHTML = '<div id="content" class="markdown-container">' + html + '</div>';
             }
         }).then(() => {
-            MathJax.typeset();
+            // Wait for MathJax to be ready before typesetting
+            if (window.MathJax) {
+                MathJax.typesetPromise().catch((err) => console.log('MathJax typeset error:', err));
+            }
         })
         .catch(error => console.log(error));
 </script>
