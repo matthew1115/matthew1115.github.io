@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,42 +10,37 @@
     <!-- Site CSS -->
     <link rel="stylesheet" href="../../static/css/main.css">
 </head>
+
 <body class="bg-light">
 
     <div class="container my-4">
         <!-- Header -->
-        <header class="text-center mb-3">
+        <header class="text-center mb-4">
             <h1 class="h2">Dice Roll Distribution</h1>
-            <p class="text-muted">Visualize the probability distribution of dice rolls using exact calculations or the Central Limit Theorem.</p>
+            <p class="text-muted">Visualize the probability distribution of dice rolls using exact calculations or the
+                Central Limit Theorem.</p>
         </header>
 
         <!-- Input Form -->
-        <form id="diceForm" class="row g-3 card p-3">
-            <!-- Number of Dice -->
-            <div class="col-md-3">
-                <label for="diceCount" class="form-label">Number of Dice (m)</label>
-                <input type="number" id="diceCount" value="3" min="1" max="200" class="form-control">
-            </div>
-            <!-- Number of Faces -->
-            <div class="col-md-3">
-                <label for="faceCount" class="form-label">Faces per Die (n)</label>
-                <input type="number" id="faceCount" value="6" min="2" max="200" class="form-control">
-            </div>
-            <!-- Calculation Method -->
-            <div class="col-md-3">
-                 <label for="method" class="form-label">Method</label>
-                <select id="method" class="form-select">
-                    <option value="exact" selected>Exact</option>
-                    <option value="clt">CLT Approximation</option>
-                    <option value="both">Compare Both</option>
-                </select>
-            </div>
-            <!-- Submit Button -->
-            <div class="col-md-3 d-grid align-self-end">
-                <button type="submit" class="btn btn-danger">Plot Distribution</button>
+        <form id="diceForm" class="card p-3">
+            <div class="row g-3">
+                <!-- Number of Dice -->
+                <div class="col-md-3">
+                    <label for="diceCount" class="form-label">Number of Dice (m)</label>
+                    <input type="number" id="diceCount" value="3" min="1" max="3000" class="form-control">
+                </div>
+                <!-- Number of Faces -->
+                <div class="col-md-3">
+                    <label for="faceCount" class="form-label">Faces per Die (n)</label>
+                    <input type="number" id="faceCount" value="6" min="2" max="3000" class="form-control">
+                </div>
+                <!-- Submit Button -->
+                <div class="col-md-3 ms-md-auto d-grid align-self-end">
+                    <button type="submit" class="btn btn-danger">Plot Distribution</button>
+                </div>
             </div>
         </form>
-        
+
         <!-- Warning Message Area -->
         <div id="warning" class="alert alert-warning text-center d-none mt-2"></div>
 
@@ -63,9 +59,12 @@
                 <div id="stats" class="card h-100">
                     <div class="card-body">
                         <h2 class="h5 text-center mb-3">Statistics</h2>
-                        <div class="d-flex justify-content-between align-items-center mb-2"><span>Mean (μ):</span> <span id="mean" class="badge text-bg-light">--</span></div>
-                        <div class="d-flex justify-content-between align-items-center mb-2"><span>Variance (σ²):</span> <span id="variance" class="badge text-bg-light">--</span></div>
-                        <div class="d-flex justify-content-between align-items-center"><span>Std. Dev. (σ):</span> <span id="stdDev" class="badge text-bg-light">--</span></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2"><span>Mean (μ):</span> <span
+                                id="mean" class="badge text-bg-light">--</span></div>
+                        <div class="d-flex justify-content-between align-items-center mb-2"><span>Variance (σ²):</span>
+                            <span id="variance" class="badge text-bg-light">--</span></div>
+                        <div class="d-flex justify-content-between align-items-center"><span>Std. Dev. (σ):</span> <span
+                                id="stdDev" class="badge text-bg-light">--</span></div>
                     </div>
                 </div>
             </div>
@@ -76,6 +75,23 @@
         const form = document.getElementById('diceForm');
         const warningDiv = document.getElementById('warning');
         let myChart = null;
+
+        // Thresholds to keep exact computations responsive on typical devices.
+        const EXACT_THRESHOLD = 4000;
+        const MAX_DICE_FOR_EXACT = 100;
+
+        /**
+         * Chooses which computation method to use based on the dice configuration.
+         * Exact is preferred for smaller inputs, while CLT keeps large cases responsive.
+         * @param {number} m - Number of dice.
+         * @param {number} n - Number of faces per die.
+         * @returns {'exact'|'clt'} The recommended strategy.
+         */
+        function chooseComputationStrategy(m, n) {
+            const computationSize = m * n;
+            const exactFeasible = computationSize <= EXACT_THRESHOLD && m <= MAX_DICE_FOR_EXACT;
+            return exactFeasible ? 'exact' : 'clt';
+        }
 
         /**
          * Calculates the exact probability distribution for m dice with n faces.
@@ -103,7 +119,7 @@
 
             const finalCounts = prevDp.slice(m); // Possible sums start from m
             const totalOutcomes = BigInt(n) ** BigInt(m);
-            
+
             // Convert BigInt counts to float probabilities, handling potential precision loss
             const probabilities = finalCounts.map(count => {
                 if (totalOutcomes === 0n) return 0;
@@ -123,18 +139,23 @@
         function calculateCLTDistribution(m, n) {
             const mean = m * (n + 1) / 2;
             const variance = m * (n * n - 1) / 12;
-            if (variance === 0) return new Array(m * n - m + 1).fill(0);
-            
+            if (variance === 0) return { probabilities: new Array(m * n - m + 1).fill(0), xvals: [] };
+
             const stdDev = Math.sqrt(variance);
             const probabilities = [];
-            
-            for (let s = m; s <= m * n; s++) {
+            const xvals = [];
+
+            // optimization to control the plotting resolution and save computation.
+            const step = Math.ceil(m * n / 1000);
+
+            for (let s = m; s <= m * n; s += step) {
                 // PDF of the Normal distribution
                 const exponent = -((s - mean) ** 2) / (2 * variance);
                 const pdf = (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(exponent);
                 probabilities.push(pdf);
+                xvals.push(s);
             }
-            return probabilities;
+            return { probabilities, xvals };
         }
 
         /**
@@ -158,7 +179,7 @@
          * @param {number[]|null} cltData - The CLT approximation data.
          * @param {string} title - The chart title.
          */
-        function plotDistribution(labels, exactData, cltData, title) {
+        function plotDistribution(labels, exactData, cltObj, title) {
             const ctx = document.getElementById('diceChart').getContext('2d');
             if (myChart) {
                 myChart.destroy();
@@ -169,25 +190,29 @@
                 datasets.push({
                     label: 'Exact Distribution',
                     data: exactData,
-                    backgroundColor: 'rgba(220, 53, 69, 0.6)',
                     borderColor: 'rgba(220, 53, 69, 1)',
+                    backgroundColor: 'rgba(220, 53, 69, 0.5)',
                     borderWidth: 1,
                     type: 'bar',
                     barPercentage: 1.0,
                     categoryPercentage: 1.0,
                 });
             }
-            if (cltData) {
+            if (cltObj && cltObj.probabilities && cltObj.xvals) {
                 datasets.push({
                     label: 'CLT Approximation',
-                    data: cltData,
-                    borderColor: 'rgba(13, 110, 253, 0.9)',
+                    data: cltObj.probabilities,
+                    borderColor: 'rgba(220, 53, 69, 1)',
+                    backgroundColor: 'rgba(220, 53, 69, 0.15)',
                     borderWidth: 3,
                     type: 'line',
-                    fill: false,
+                    fill: true, // Enable shading under the curve
                     pointRadius: 0,
                     tension: 0.1,
-                    borderDash: [6, 4]
+                    parsing: false,
+                    spanGaps: true,
+                    // Use custom x values for the line
+                    data: cltObj.xvals.map((x, i) => ({ x, y: cltObj.probabilities[i] })),
                 });
             }
 
@@ -215,24 +240,33 @@
                             ticks: {
                                 maxTicksLimit: 25, // Prevents axis from getting too cluttered
                                 autoSkip: true,
-                            }
+                                stepSize: 1, // Force integer steps
+                                callback: function(value) {
+                                    // Only display integer values
+                                    return Number.isInteger(value) ? value : null;
+                                }
+                            },
+                            type: 'linear',
+                            min: labels[0],
+                            max: labels[labels.length - 1],
                         }
                     }
                 }
             });
             // Optional: fade-in animation removed to rely on site CSS only
         }
-        
+
         /**
          * Main function to handle form submission and orchestrate calculations and plotting.
          */
         function handlePlot() {
             const m = parseInt(document.getElementById('diceCount').value) || 0;
             const n = parseInt(document.getElementById('faceCount').value) || 0;
-            const method = document.getElementById('method').value;
 
             warningDiv.classList.add('d-none');
             warningDiv.textContent = '';
+            warningDiv.classList.remove('alert-info');
+            warningDiv.classList.add('alert-warning');
 
             if (m <= 0 || n < 2) {
                 warningDiv.textContent = 'Please enter a valid number of dice (>= 1) and faces (>= 2).';
@@ -241,9 +275,12 @@
             }
 
             const computationSize = m * n;
-            if ((method === 'exact' || method === 'both') && computationSize > 10000) {
-                 warningDiv.textContent = `Warning: Exact calculation for ${m}d${n} may be slow.`;
-                 warningDiv.classList.remove('d-none');
+            const strategy = chooseComputationStrategy(m, n);
+            if (strategy === 'clt') {
+                warningDiv.textContent = `Using CLT approximation for ${m}d${n}, exact calculation would be slow`;
+                warningDiv.classList.remove('d-none');
+                warningDiv.classList.remove('alert-warning');
+                warningDiv.classList.add('alert-info');
             }
 
             const minSum = m;
@@ -251,17 +288,18 @@
             const labels = Array.from({ length: maxSum - minSum + 1 }, (_, i) => minSum + i);
 
             let exactProbs = null;
-            if (method === 'exact' || method === 'both') {
+            if (strategy === 'exact') {
                 exactProbs = calculateExactDistribution(m, n);
             }
 
-            let cltProbs = null;
-            if (method === 'clt' || method === 'both') {
-                cltProbs = calculateCLTDistribution(m, n);
+            let cltObj = null;
+            if (strategy === 'clt') {
+                cltObj = calculateCLTDistribution(m, n);
             }
-            
+
             updateStats(m, n);
-            plotDistribution(labels, exactProbs, cltProbs, `Distribution for ${m}d${n}`);
+            const methodLabel = strategy === 'exact' ? 'Exact' : 'CLT';
+            plotDistribution(labels, exactProbs, cltObj, `Distribution for ${m}d${n} (${methodLabel})`);
         }
 
         // Add event listener and trigger initial plot on load
@@ -269,8 +307,9 @@
             e.preventDefault();
             handlePlot();
         });
-        
+
         window.addEventListener('load', handlePlot);
     </script>
 </body>
+
 </html>
