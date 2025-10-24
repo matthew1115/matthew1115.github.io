@@ -1,6 +1,7 @@
 ## From dice rolling to the Multinomial theorem
 
 ### Introduction
+It all started when I tried to write a curve plotter for dicing (the little tool you'll see under the tools section of my blog). In statistics, there is the way to approx the distribution to a normal curve. But when the CLT does not apply, take 1d6 for example, the normal curve gives nothing near to the truth. So I tried to find a way to calculate the exact probabilities for those that fail to meet the needs of CLT. 
 
 At first glance, calculating dice sums and expanding polynomials seem like entirely different mathematical endeavors. One belongs to the world of probability and games, the other to algebra and analysis. Yet beneath the surface, these problems share a common combinatorial structure that reveals the elegant unity of mathematics.
 
