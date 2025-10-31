@@ -1,1 +1,1 @@
-[Prediction Model Research in FRC](publish/Prediction_Model_Research_in_FRC.pdf)
+[Prediction Model Research in FRC](contents/publish/Prediction_Model_Research_in_FRC.pdf)
