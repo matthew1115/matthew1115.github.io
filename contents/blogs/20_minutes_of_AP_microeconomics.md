@@ -39,7 +39,7 @@
 
 ### 6. Elasticity
 - **Price Elasticity of Demand (PED)**: Measures responsiveness of $Q_D$ to a price change.
-  $$\text{PED} = \frac{\%\Delta Q_D}{\%\Delta P}$$
+  $$\text{PED} = \frac{\\%\Delta Q_D}{\\%\Delta P}$$
   - $|\text{PED}| > 1$: Elastic (responsive).
   - $|\text{PED}| < 1$: Inelastic (unresponsive).
   - $|\text{PED}| = 1$: Unit Elastic.
