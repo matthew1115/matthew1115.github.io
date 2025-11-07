@@ -16,7 +16,7 @@
   - Bow-out PPC (typical): Increasing OC (due to specialized resources).
 - **Economic Growth**: Outward shift of the PPC (due to new resources or technology).
 
-> [Insert PPC Graph Placeholder Here (Points, Shift, Slope)]
+![Production Possibilities Frontier](/contents/pictures/20_min_AP_microeconomics/Micro_PPF.svg)
 
 ### 3. Comparative Advantage and Gains from Trade
 - **Absolute Advantage**: Ability to produce more of a good with the same resources.
@@ -66,14 +66,14 @@
 - **Price Ceiling (Max $P$)**: Set below $P_e$. Creates a Shortage ($Q_D > Q_S$) and often Deadweight Loss (DWL).
 - **Price Floor (Min $P$)**: Set above $P_e$. Creates a Surplus ($Q_S > Q_D$) and often DWL.
 
-> [Insert Supply/Demand Graph Placeholder Here (Ceilings/Floors, Shortage/Surplus)]
+![Supply Demand Graph](/contents/pictures/20_min_AP_microeconomics/Supply_Demand_Graph.svg)
 
 - **Per-Unit Tax (on Sellers)**: Shifts Supply left/up.
   - Tax Revenue $= \text{Tax per Unit} \times Q_{new}$.
   - Tax Incidence: The burden is shared, depending on relative elasticities (inelastic side pays more). Taxes create DWL.
 - **Per-Unit Subsidy (on Sellers)**: Shifts Supply right/down. Increases $Q$, decreases $P_c$ (consumer price), increases $P_p$ (producer price).
 
-> [Insert Tax Incidence/DWL Graph Placeholder Here]
+![Dead Weight Loss Graph on Taxing](/contents/pictures/20_min_AP_microeconomics/Micro_DWL.png)
 
 ## Unit 3: Production, Cost, and Perfect Competition
 
@@ -98,7 +98,7 @@
   $$MC = \frac{\Delta TC}{\Delta Q}$$
 - MC intersects ATC and AVC at their minimum points. MC curve is typically J-shaped; ATC and AVC are U-shaped.
 
-> [Insert Short-Run Cost Curves Graph Placeholder Here (MC, ATC, AVC)]
+![Short run cost curves](/contents/pictures/20_min_AP_microeconomics/short_run_cost_curves.svg)
 
 ### 13. Long-Run Costs
 - **Long-Run**: All inputs are variable.
@@ -117,7 +117,7 @@
   $$P = MC = ATC_{\min}$$
   (Productive and Allocatively Efficient).
 
-> [Insert Perfect Competition Short-Run and Long-Run Graphs Placeholder Here (Side-by-Side)]
+![Perfect Competition Short-Run and Long-Run Graphs (Side-by-Side)](/contents/pictures/20_min_AP_microeconomics/Perfect_competition_curves.svg)
 
 ## Unit 4: Imperfect Competition
 
