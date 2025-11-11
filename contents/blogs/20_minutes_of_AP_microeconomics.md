@@ -118,7 +118,7 @@
   (Productive and Allocatively Efficient).
 
 <!-- ![Perfect Competition Short-Run and Long-Run Graphs (Side-by-Side)](/contents/pictures/20_min_AP_microeconomics/Perfect_competition_curves_negetive_short_term.svg) -->
-<iframe src="/contents/pictures/20_min_AP_microeconomics/Perfect_competition_curves_interactive.html" width="800" height="600" frameborder="0"></iframe>
+<iframe src="/contents/pictures/20_min_AP_microeconomics/Perfect_competition_curves_interactive.html" width="100%" height="810" frameborder="0"></iframe>
 
 ## Unit 4: Imperfect Competition
 
