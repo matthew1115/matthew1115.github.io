@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Perfect Competition Plot</title>
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .plots-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .plot {
+            flex: 1;
+            min-width: 500px;
+            height: 500px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .slider-container label {
+            min-width: 120px;
+            font-weight: bold;
+        }
+        .slider-container input {
+            flex: 1;
+        }
+        .value-display {
+            min-width: 50px;
+            text-align: right;
+        }
+        .info-box {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f4fd;
+            border-left: 4px solid #2196F3;
+            border-radius: 4px;
+        }
+        @media (max-width: 1100px) {
+            .plots-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Interactive Perfect Competition Analysis</h1>
+        
+        <div class="plots-container">
+            <div id="short-run-plot" class="plot"></div>
+            <div id="long-run-plot" class="plot"></div>
+        </div>
+        
+        <div class="controls">
+            <h3>Adjust Parameters</h3>
+            <div class="slider-container">
+                <label for="price-slider">Price (P):</label>
+                <input type="range" id="price-slider" min="10" max="80" step="1" value="20">
+                <span id="price-value" class="value-display">20</span>
+            </div>
+            
+            <div class="slider-container">
+                <label for="tfc-slider">Total Fixed Cost (TFC):</label>
+                <input type="range" id="tfc-slider" min="50" max="300" step="10" value="150">
+                <span id="tfc-value" class="value-display">150</span>
+            </div>
+            
+            <div class="slider-container">
+                <label for="avc-slider">AVC Coefficient:</label>
+                <input type="range" id="avc-slider" min="0.005" max="0.02" step="0.001" value="0.01">
+                <span id="avc-value" class="value-display">0.01</span>
+            </div>
+            
+            <div class="info-box">
+                <p><strong>Instructions:</strong> Adjust the sliders to see how changes in price and cost structures affect the firm's equilibrium and profitability in both short-run and long-run scenarios.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize with default values
+        let price = 20;
+        let TFC = 150;
+        let avcCoefficient = 0.01;
+        
+        // Generate quantity range
+        const Q = Array.from({length: 500}, (_, i) => 1 + i * 109/499);
+        
+        // Function to update plots
+        function updatePlots() {
+            // Update displayed values
+            document.getElementById('price-value').textContent = price;
+            document.getElementById('tfc-value').textContent = TFC;
+            document.getElementById('avc-value').textContent = avcCoefficient.toFixed(3);
+            
+            // Calculate curves for short-run
+            const AVC = Q.map(q => avcCoefficient * Math.pow(q, 2) - 0.8 * q + 40);
+            const AFC = Q.map(q => TFC / q);
+            const ATC = Q.map((q, i) => AVC[i] + AFC[i]);
+            const MC = Q.map(q => 0.024 * Math.pow(q, 2) - 1.6 * q + 40);
+            const MR = Q.map(() => price);
+            
+            // Find equilibrium point (MC = MR)
+            let eqIndex = 0;
+            let minDiff = Math.abs(MC[0] - price);
+            for (let i = 1; i < MC.length; i++) {
+                const diff = Math.abs(MC[i] - price);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    eqIndex = i;
+                }
+            }
+            
+            const eqQuantity = Q[eqIndex];
+            const eqATC = ATC[eqIndex];
+            const profitPerUnit = price - eqATC;
+            const totalProfit = profitPerUnit * eqQuantity;
+            
+            // Calculate curves for long-run
+            const Q0 = 50;
+            const min_ATC = 50;
+            const ATC_lr = Q.map(q => 0.02 * Math.pow(q - Q0, 2) + min_ATC);
+            const MC_lr = Q.map(q => 0.02 * (3 * Math.pow(q, 2) - 4 * Q0 * q + Math.pow(Q0, 2)) + min_ATC);
+            const P_lr = min_ATC;
+            const MR_lr = Q.map(() => P_lr);
+            
+            // Find equilibrium for long-run
+            let min_ATC_idx = 0;
+            let min_ATC_value = ATC_lr[0];
+            for (let i = 1; i < ATC_lr.length; i++) {
+                if (ATC_lr[i] < min_ATC_value) {
+                    min_ATC_value = ATC_lr[i];
+                    min_ATC_idx = i;
+                }
+            }
+            const eq_quantity_lr = Q[min_ATC_idx];
+            
+            // Create short-run plot
+            const shortRunTrace1 = {
+                x: Q,
+                y: MC,
+                mode: 'lines',
+                name: 'MC',
+                line: {color: 'black', width: 3}
+            };
+            
+            const shortRunTrace2 = {
+                x: Q,
+                y: ATC,
+                mode: 'lines',
+                name: 'ATC',
+                line: {color: 'blue', width: 3}
+            };
+            
+            const shortRunTrace3 = {
+                x: Q,
+                y: AVC,
+                mode: 'lines',
+                name: 'AVC',
+                line: {color: 'orange', width: 3}
+            };
+            
+            const shortRunTrace4 = {
+                x: Q,
+                y: MR,
+                mode: 'lines',
+                name: 'P = MR = D',
+                line: {color: 'green', width: 3, dash: 'dash'}
+            };
+            
+            const shortRunTrace5 = {
+                x: [eqQuantity, eqQuantity],
+                y: [0, 120],
+                mode: 'lines',
+                name: 'Optimal Q',
+                line: {color: 'red', width: 2, dash: 'dot'}
+            };
+            
+            const shortRunTrace6 = {
+                x: [eqQuantity],
+                y: [price],
+                mode: 'markers',
+                name: 'Equilibrium',
+                marker: {color: 'red', size: 12}
+            };
+            
+            // Create profit area (rectangle)
+            const profitArea = {
+                x: [0, eqQuantity, eqQuantity, 0, 0],
+                y: [eqATC, eqATC, price, price, eqATC],
+                mode: 'lines',
+                fill: 'toself',
+                fillcolor: 'rgba(255, 0, 0, 0.2)',
+                line: {width: 0},
+                name: `Profit: $${totalProfit.toFixed(1)}`,
+                showlegend: true
+            };
+            
+            const shortRunLayout = {
+                title: `Perfect Competition - Short Run<br>Profit Maximization at MC = MR<br>Price: $${price}`,
+                xaxis: {title: 'Quantity (Q)', range: [2, 110]},
+                yaxis: {title: 'Cost / Price', range: [0, 120]},
+                showlegend: true,
+                legend: {x: 0, y: 1},
+                annotations: [
+                    {
+                        x: eqQuantity,
+                        y: price,
+                        xref: 'x',
+                        yref: 'y',
+                        text: `MC = MR<br>Q* = ${eqQuantity.toFixed(1)}`,
+                        showarrow: true,
+                        arrowhead: 7,
+                        ax: 0,
+                        ay: -40,
+                        bgcolor: 'rgba(255, 255, 255, 0.8)',
+                        bordercolor: 'red',
+                        borderwidth: 1
+                    }
+                ]
+            };
+            
+            Plotly.newPlot('short-run-plot', 
+                [shortRunTrace1, shortRunTrace2, shortRunTrace3, shortRunTrace4, 
+                 shortRunTrace5, shortRunTrace6, profitArea], 
+                shortRunLayout, {responsive: true});
+            
+            // Create long-run plot
+            const longRunTrace1 = {
+                x: Q,
+                y: MC_lr,
+                mode: 'lines',
+                name: 'MC',
+                line: {color: 'black', width: 3}
+            };
+            
+            const longRunTrace2 = {
+                x: Q,
+                y: ATC_lr,
+                mode: 'lines',
+                name: 'ATC',
+                line: {color: 'blue', width: 3}
+            };
+            
+            const longRunTrace3 = {
+                x: Q,
+                y: MR_lr,
+                mode: 'lines',
+                name: 'P = MR = D = min(ATC)',
+                line: {color: 'green', width: 3, dash: 'dash'}
+            };
+            
+            const longRunTrace4 = {
+                x: [eq_quantity_lr],
+                y: [min_ATC],
+                mode: 'markers',
+                name: 'Long-Run Equilibrium',
+                marker: {color: 'red', size: 12}
+            };
+            
+            const longRunLayout = {
+                title: 'Perfect Competition - Long Run<br>Zero Economic Profit',
+                xaxis: {title: 'Quantity (Q)', range: [1, 110]},
+                yaxis: {title: 'Cost / Price', range: [0, 120]},
+                showlegend: true,
+                legend: {x: 0, y: 1},
+                annotations: [
+                    {
+                        x: eq_quantity_lr,
+                        y: min_ATC,
+                        xref: 'x',
+                        yref: 'y',
+                        text: 'Long-Run Equilibrium<br>P = MC = min(ATC)<br>Zero Economic Profit',
+                        showarrow: true,
+                        arrowhead: 7,
+                        ax: 0,
+                        ay: -40,
+                        bgcolor: 'rgba(255, 255, 255, 0.8)',
+                        bordercolor: 'red',
+                        borderwidth: 1
+                    }
+                ]
+            };
+            
+            Plotly.newPlot('long-run-plot', 
+                [longRunTrace1, longRunTrace2, longRunTrace3, longRunTrace4], 
+                longRunLayout, {responsive: true});
+        }
+        
+        // Set up event listeners for sliders
+        document.getElementById('price-slider').addEventListener('input', function() {
+            price = parseFloat(this.value);
+            updatePlots();
+        });
+        
+        document.getElementById('tfc-slider').addEventListener('input', function() {
+            TFC = parseFloat(this.value);
+            updatePlots();
+        });
+        
+        document.getElementById('avc-slider').addEventListener('input', function() {
+            avcCoefficient = parseFloat(this.value);
+            updatePlots();
+        });
+        
+        // Initialize plots
+        updatePlots();
+    </script>
+</body>
+</html>
