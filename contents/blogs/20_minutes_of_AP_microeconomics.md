@@ -40,6 +40,9 @@
 ### 6. Elasticity
 - **Price Elasticity of Demand (PED)**: Measures responsiveness of $Q_D$ to a price change.
   $$\text{PED} = \frac{\\%\Delta Q_D}{\\%\Delta P}$$
+  - Where $\\%\Delta Q_D$ and $\\%\Delta P$ are calculated using the midpoint method:
+    $$\\%\Delta X = \frac{X_{\text{new}} - X_{\text{old}}}{(X_{\text{new}} + X_{\text{old}})/2} \times 100\\%$$
+    (This method avoids bias from the direction of change.)
   - $|\text{PED}| > 1$: Elastic (responsive).
   - $|\text{PED}| < 1$: Inelastic (unresponsive).
   - $|\text{PED}| = 1$: Unit Elastic.
@@ -62,11 +65,11 @@
 - **Shifts in Demand or Supply (or both)** change the equilibrium Price ($P_e$) and Quantity ($Q_e$).
 - **Double Shifts**: When both $D$ and $S$ shift, either $P_e$ or $Q_e$ will be indeterminate.
 
+![Supply Demand Graph](/contents/pictures/20_min_AP_microeconomics/Supply_Demand_Graph.svg)
+
 ### 9. The Effect of Government Intervention
 - **Price Ceiling (Max $P$)**: Set below $P_e$. Creates a Shortage ($Q_D > Q_S$) and often Deadweight Loss (DWL).
 - **Price Floor (Min $P$)**: Set above $P_e$. Creates a Surplus ($Q_S > Q_D$) and often DWL.
-
-![Supply Demand Graph](/contents/pictures/20_min_AP_microeconomics/Supply_Demand_Graph.svg)
 
 - **Per-Unit Tax (on Sellers)**: Shifts Supply left/up.
   - Tax Revenue $= \text{Tax per Unit} \times Q_{new}$.
