@@ -148,7 +148,7 @@
   - **Dominant Strategy**: Best strategy regardless of the opponent's choice.
   - **Nash Equilibrium**: Outcome where no player has an incentive to unilaterally change their strategy.
 
-> [Insert Monopoly/Monopolistic Competition/Oligopoly Game Matrix Graph Placeholder Here]
+![Prisoner's Dilemma Matrix](/contents/pictures/20_min_AP_microeconomics/Prisoners_dilemma.svg)
 
 ## Unit 5: Factor Markets
 
@@ -162,7 +162,7 @@
 - **Profit-Maximizing Hiring Rule**: Hire labor until
   $$\text{MRP} = \text{MFC}$$
 
-> [Insert Labor Market Graph Placeholder Here (S, D, Wage, MRP=MFC)]
+![Labor Market plot](/contents/pictures/20_min_AP_microeconomics/labor_market.svg)
 
 ## Unit 6: Market Failure and the Role of Government
 
