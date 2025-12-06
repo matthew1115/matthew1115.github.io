@@ -139,6 +139,8 @@
   $P = ATC$ but $P > MC$ (Not Allocatively Efficient).
 - **Excess Capacity**: Produces less than the $ATC_{\min}$ output level.
 
+![Monopoly and monopolistic compatition market graph](/contents/pictures/20_min_AP_microeconomics/monopoly_monopolistic_compatition.svg)
+
 ### 17. Oligopoly
 - **Characteristics**: Few large firms, interdependence, high barriers to entry.
 - **Collusion/Cartel**: Firms agree to act like a monopoly (illegal).
