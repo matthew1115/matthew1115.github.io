@@ -159,7 +159,7 @@
 - If product demand falls, labor demand falls.
 
 ### 19. The Labor Market
-#### A. Core Terms You Must Know
+#### A. Core Terms
 - **MPL (Marginal Product of Labor)**: extra output from hiring one more worker.
 - **VMPL (Value of MPL)**: dollar value of that extra output.
   $$\text{VMPL} = \text{MPL} \times P$$
@@ -178,6 +178,9 @@
 - **MFC (Marginal Factor Cost)**: extra cost of one more worker.
 - In a competitive labor market for a firm, the firm is a wage taker, so:
   $$\text{MFC} = W$$
+
+In a **competitive (free) labor market**, many firms compete for workers, so each firm is a wage taker and wage = MFC.
+In a **monopsonistic labor market**, one firm hires most workers, so MFC > wage, resulting in lower wages and employment than a competitive market.
 
 #### D. Profit-Maximizing Hiring Rule
 - Hire workers up to where the extra benefit equals extra cost:
